@@ -1,0 +1,276 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include<cstdlib>
+using namespace std;
+
+struct Adresat
+{
+    int id;
+    string name, surename, mobile, email, adress;
+};
+void sendDataToFile(vector<Adresat> contacts)
+{
+    fstream file;
+    file.open("ksiazka_adresowa.txt",ios::out | ios::trunc );
+    file.clear();
+    file.close();
+    file.open("ksiazka_adresowa.txt", ios::out| ios::app);
+    for (int i =0; i<contacts.size(); i++)
+    {
+        file<<contacts[i].id<<"|"<<contacts[i].name<<"|"<<contacts[i].surename<<"|"<<contacts[i].mobile<<"|"<<contacts[i].email<<"|"<<contacts[i].adress<<"|"<<endl;
+    }
+    file.close();
+
+}
+
+vector<Adresat> loadDataFromFile(vector<Adresat> contacts)
+{
+    string line;
+    int lineNumber = 1;
+    fstream file;
+    Adresat singleContact;
+
+    file.open("ksiazka_adresowa.txt", ios::in);
+
+    if(file.is_open())
+    {
+        while(getline(file,line))
+        {
+            string contact[6];
+            int endOfString = line.length();
+            int index = 0;
+            int beginOfWord = 0;
+            int lengthOfWord = 0;
+            int conctactIndex = 0;
+
+            for(index = 0; index < endOfString; index++)
+            {
+
+                if((int)line[index] == 124)
+                {
+                    lengthOfWord = index - beginOfWord;
+                    contact[conctactIndex] = line.substr(beginOfWord, lengthOfWord);
+                    beginOfWord = index + 1;
+                    conctactIndex++;
+                }
+            }
+            singleContact.id = atoi(contact[0].c_str());
+            singleContact.name = contact[1];
+            singleContact.surename = contact[2];
+            singleContact.mobile = contact[3];
+            singleContact.email = contact[4];
+            singleContact.adress = contact[5];
+
+            contacts.push_back(singleContact);
+
+        }
+        file.close();
+        cout<<"Znalaz3o jakies kontakty, contact size = "<<contacts.size()<<endl;
+        return contacts;
+    }
+    else
+    {
+        file.close();
+        cout<<"NIE Znalaz3o jakies kontakty"<<endl;
+        return contacts;
+    }
+}
+
+vector<Adresat> editData(vector<Adresat> adresats)
+{
+    char choice;
+    string name, surename, adress, email, mobile;
+    int searchedID=0;
+    cout<<"Podaj id które chcesz edytowac: ";
+    cin>>searchedID;
+    for (int i=0; i<adresats.size(); i++)
+    {
+        if(adresats[i].id == searchedID)
+        {
+
+            cout<<"Ktora dana chcesz zmienic? wybierz z ponizszej listy"<<endl;
+            cout<<"1 imie"<<endl;
+            cout<<"2 nazwisko"<<endl;
+            cout<<"3 numer telefonu"<<endl;
+            cout<<"4 email"<<endl;
+            cout<<"5 adres"<<endl;
+            cout<<"6 powot do menu"<<endl;
+            cin>>choice;
+            switch(choice)
+            {
+            case '1':
+                cout<<"Podaj nowe imie: ";
+                cin>>name;
+                adresats[i].name = name;
+                break;
+            case '2':
+                cout<<"Podaj nowe nazwisko: ";
+                cin>>surename;
+                adresats[i].surename = surename;
+                break;
+            case '3':
+                cout<<"Podaj nowe telefon: ";
+                cin>>mobile;
+                adresats[i].mobile = mobile;
+                break;
+            case '4':
+                cout<<"Podaj nowe email: ";
+                cin>>email;
+                adresats[i].email = email;
+                break;
+            case '5':
+                cout<<"Podaj nowe adres: ";
+                cin>>adress;
+                adresats[i].adress = adress;
+                break;
+            case '6':
+                break;
+            }
+        }
+    }
+    sendDataToFile(adresats);
+    return adresats;
+}
+void displayMenu()
+{
+    cout<< "    KSIAZKA ADRESOWA"<<endl;
+    cout << "1.Dodaj przyjaciela " << endl;
+    cout << "2.Wyszukaj po imieniu " << endl;
+    cout << "3.Wyszukaj po nazwisku " << endl;
+    cout << "4.Wywietl liste wszystkch znajomych " << endl;
+    cout << "5.Usuwanie kontaktu ( po ID) "<<endl;
+    cout << "6.Edytuj kontakt " << endl;
+    cout << "9.zakoncz prace " << endl;
+    cout << "Twoj wybor: ";
+}
+void saveSingleDataInfile(vector<Adresat> adresaci, int id)
+{
+    fstream file;
+    file.open("ksiazka_adresowa.txt", ios::out| ios::app);
+    file<<adresaci[id].id<<"|"<<adresaci[id].name<<"|"<<adresaci[id].surename<<"|"<<adresaci[id].mobile<<"|"<<adresaci[id].email<<"|"<<adresaci[id].adress<<"|"<<endl;
+    file.close();
+}
+vector<Adresat> addFriend(vector <Adresat> adresats, int id, int countFriends)
+{
+
+    Adresat personalData;
+    if (adresats.size()!=0)
+        id = adresats[adresats.size()-1].id;
+    string name, surename, adress, email, mobile;
+    countFriends= adresats.size();
+    cout<<"Podaj imie: ";
+    cin>>name;
+    cout<<"Podaj nazwisko: ";
+    cin>>surename;
+    cout<<"Podaj telefon: ";
+    cin>>mobile;
+    cout<<"Podaj email: ";
+    cin >>email;
+    cout<<"Podaj adres: ";
+    cin>>adress;
+
+    personalData.id = id+1;
+    personalData.name = name;
+    personalData.surename = surename;
+    personalData.mobile = mobile;
+    personalData.email = email;
+    personalData.adress = adress;
+    cout<<"Znajomy dodany do listy."<<endl<<endl;
+    adresats.push_back(personalData);
+    saveSingleDataInfile(adresats, countFriends);
+    return adresats;
+}
+int main()
+{
+    vector<Adresat> adresats;
+    vector<string> dane;
+    Adresat personalData;
+
+    string searchedName, searchedSurename,name, surename, adress, email, mobile;
+    char choice;
+    int id=0,  countFriends = 0,count=0;
+
+    adresats = loadDataFromFile(adresats);
+
+    if (adresats.size()!=0)
+        id = adresats[adresats.size()-1].id;
+    while(1)
+    {
+        displayMenu();
+        cin>>choice;
+        switch(choice)
+        {
+        case '1':
+        {
+            adresats=addFriend(adresats, id, countFriends);
+            countFriends++;
+            id++;
+        }
+        break;
+        case '2':
+        {
+            cout<<"Podaj szukane imie: ";
+            cin>>searchedName;
+            for (int i =0; i<adresats.size(); i++)
+            {
+                if(adresats[i].name==searchedName)
+                    cout<<adresats[i].id<<"|"<<adresats[i].name<<"|"<<adresats[i].surename<<"|"<<adresats[i].mobile<<"|"<<adresats[i].email<<"|"<<adresats[i].adress<<"|"<<endl;
+            }
+        }
+        break;
+        case '3':
+        {
+            cout<<"Podaj szukane nazwisko: ";
+            cin>>searchedSurename;
+            for (int i =0; i<adresats.size(); i++)
+            {
+                if(adresats[i].surename==searchedSurename)
+                    cout<<adresats[i].id<<"|"<<adresats[i].name<<"|"<<adresats[i].surename<<"|"<<adresats[i].mobile<<"|"<<adresats[i].email<<"|"<<adresats[i].adress<<"|"<<endl;
+            }
+        }
+        break;
+        case '4':
+        {
+            cout<<"Wszyscy znajomi: "<<endl;
+            for (int i =0; i<adresats.size(); i++)
+                cout<<adresats[i].id<<"|"<<adresats[i].name<<"|"<<adresats[i].surename<<"|"<<adresats[i].mobile<<"|"<<adresats[i].email<<"|"<<adresats[i].adress<<"|"<<endl;
+        }
+        break;
+        case '5':
+        {
+            int idToDelete;
+            cout<<"Podaj id uzytkwnka do usuniecia: ";
+            cin>>idToDelete;
+            for (int i =0; i<adresats.size(); i++)
+            {
+                if(adresats[i].id==idToDelete)
+                {
+                    adresats.erase(adresats.begin()+i);
+                    countFriends--;
+                    if(i==(adresats.size()))
+                    {
+                        id--;
+                    }
+                }
+            }
+            sendDataToFile(adresats);
+
+        }
+        break;
+        case '6':
+        {
+            adresats = editData(adresats);
+
+        }
+
+        break;
+        case '9':
+            exit(0);
+        }
+    }
+
+    return 0;
+}
